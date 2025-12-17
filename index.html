@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://127.0.0.1:*;">
+    <title>Audio Repair Studio - Learning Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #12172e;
+            --bg-tertiary: #1a2240;
+            --text-primary: #e0e6ff;
+            --text-secondary: #a0a8c0;
+            --accent-primary: #32b8c6;
+            --accent-secondary: #ff6b6b;
+            --border-color: #2d3548;
+            --success: #51cf66;
+            --warning: #ffa94d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .version {
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: var(--bg-tertiary);
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 20px;
+            gap: 5px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--accent-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+        }
+
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg-primary);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .lesson-card {
+            background: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-primary);
+            margin-bottom: 10px;
+        }
+
+        .lesson-title {
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .lesson-content {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .challenge-box {
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, #1a3240 100%);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--accent-primary);
+            margin-bottom: 10px;
+        }
+
+        .challenge-title {
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .challenge-description {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+
+        button:hover {
+            background: #2aa3b0;
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        canvas {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .tip-box {
+            background: rgba(81, 207, 102, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .info-badge {
+            display: inline-block;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-right: 5px;
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+        }
+
+        label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🎵 Audio Repair Studio - Learning</div>
+            <div class="version">Educational Edition v1.0</div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="home">Home</button>
+            <button class="tab-btn" data-tab="learn">Learn Concepts</button>
+            <button class="tab-btn" data-tab="tools">Audio Tools</button>
+            <button class="tab-btn" data-tab="tutorials">Tutorials</button>
+            <button class="tab-btn" data-tab="challenges">Challenges</button>
+            <button class="tab-btn" data-tab="note-editor">Note Editor 🎵</button>
+        </div>
+
+        <div class="content">
+            <!-- HOME TAB -->
+            <div class="tab-content active" id="home-tab">
+                <div class="section">
+                    <div class="section-title">Welcome to Audio Repair Studio Learning Edition</div>
+                    <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 15px;">
+                        Learn professional audio editing techniques with interactive lessons and hands-on challenges. This educational version includes the same powerful tools as the professional edition, plus guided lessons to help you master audio repair.
+                    </p>
+                    <button id="load-audio" style="width: 100%; padding: 15px; font-size: 14px;">📁 Load Audio File</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Getting Started</div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">1️⃣ Learn the Basics</div>
+                        <div class="lesson-content">Start with the "Learn Concepts" tab to understand audio fundamentals.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">2️⃣ Try the Tools</div>
+                        <div class="lesson-content">Use the "Audio Tools" tab to practice with professional repair tools.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">3️⃣ Follow Tutorials</div>
+                        <div class="lesson-content">Check out step-by-step tutorials in the "Tutorials" tab.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">4️⃣ Complete Challenges</div>
+                        <div class="lesson-content">Test your skills with practical challenges in the "Challenges" tab.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Audio Information</div>
+                    <div id="audio-info" style="color: var(--text-secondary); text-align: center;">
+                        No file loaded - Load an audio file to see information
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEARN CONCEPTS TAB -->
+            <div class="tab-content" id="learn-tab">
+                <div class="section">
+                    <div class="section-title">📚 Lesson 1: Understanding Audio Signals</div>
+                    <div class="lesson-content">
+                        <p style="margin-bottom: 10px;">Audio is represented as digital samples - numbers that describe the amplitude of sound at regular intervals. The more samples per second (sample rate), the better the quality.</p>
+                        <div class="tip-box">💡 <strong>Tip:</strong> CD quality audio uses 44.1 kHz (44,100 samples per second). Professional audio often uses 48 kHz or higher.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📚 Lesson 2: What is Noise?</div>
+                    <div class="lesson-content">
+                        <p style="margin-bottom: 10px;">Noise is unwanted sound - hum from power lines, background noise, hiss, clicks, and pops. Audio repair tools help remove or reduce these problems.</p>
+                        <div class="tip-box">💡 <strong>Tip:</strong> The Noise Gate silences audio below a certain volume threshold, removing background noise.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📚 Lesson 3: Equalization (EQ)</div>
+                    <div class="lesson-content">
+                        <p style="margin-bottom: 10px;">EQ lets you boost or cut specific frequencies. A 3-band EQ controls low (bass), mid, and high (treble) frequencies separately.</p>
+                        <div class="tip-box">💡 <strong>Tip:</strong> Reduce high frequencies to make audio sound warmer, or boost them for more clarity and presence.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📚 Lesson 4: Dynamic Range & Compression</div>
+                    <div class="lesson-content">
+                        <p style="margin-bottom: 10px;">Compression reduces the volume difference between loud and quiet parts of audio. This creates a more consistent, professional sound.</p>
+                        <div class="tip-box">💡 <strong>Tip:</strong> Compression ratio of 4:1 means that for every 4 dB the signal goes over the threshold, only 1 dB comes out.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📚 Lesson 5: Pitch Detection & Correction</div>
+                    <div class="lesson-content">
+                        <p style="margin-bottom: 10px;">Modern pitch detection algorithms like YIN can identify individual notes in audio. Pitch correction snaps notes to a scale for perfect intonation.</p>
+                        <div class="tip-box">💡 <strong>Tip:</strong> This is the same technology used in professional vocal production!</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📚 Lesson 6: Professional Workflow</div>
+                    <div class="lesson-content">
+                        <p style="margin-bottom: 10px;">Professional audio engineers follow a standard workflow: 1) Noise reduction 2) EQ 3) Compression 4) Pitch correction 5) Export. Always work non-destructively on copies of your files!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AUDIO TOOLS TAB -->
+            <div class="tab-content" id="tools-tab">
+                <div class="section">
+                    <div class="section-title">Audio Repair Tools</div>
+                    <button style="width: 100%;" onclick="alert('Load an audio file first using the Home tab!')">🔧 Noise Gate</button>
+                    <button style="width: 100%; margin-top: 10px;" onclick="alert('Load an audio file first using the Home tab!')">🎯 Click Removal</button>
+                    <button style="width: 100%; margin-top: 10px;" onclick="alert('Load an audio file first using the Home tab!')">🔌 De-Hum</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Playback Controls</div>
+                    <div class="button-group">
+                        <button id="play-btn">▶ Play</button>
+                        <button id="stop-btn" class="secondary">⏹ Stop</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Waveform Display</div>
+                    <canvas id="waveform-canvas"></canvas>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Visual representation of your audio signal</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">Spectrogram Display</div>
+                    <canvas id="spectrogram-canvas"></canvas>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Frequency analysis over time (brighter = louder)</div>
+                </div>
+            </div>
+
+            <!-- TUTORIALS TAB -->
+            <div class="tab-content" id="tutorials-tab">
+                <div class="section">
+                    <div class="section-title">📖 Tutorial 1: Removing Background Noise</div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 1: Load Your Audio</div>
+                        <div class="lesson-content">Click "Load Audio File" in the Home tab to open an audio file containing background noise.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 2: Use Noise Gate</div>
+                        <div class="lesson-content">Set the threshold to -40dB and apply the Noise Gate. This removes audio below that volume level.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 3: Fine-tune</div>
+                        <div class="lesson-content">Listen to the result and adjust if needed. Higher threshold = more aggressive noise reduction.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📖 Tutorial 2: Removing Clicks and Pops</div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 1: Identify Clicks</div>
+                        <div class="lesson-content">Look at the waveform. Clicks appear as sharp spikes in the audio.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 2: Apply Click Removal</div>
+                        <div class="lesson-content">Click "Remove Clicks" to automatically detect and remove transient clicks.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 3: Verify Results</div>
+                        <div class="lesson-content">Listen to the audio and check the waveform. The sharp spikes should be smoothed.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📖 Tutorial 3: Professional EQ Workflow</div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 1: Reduce Mud</div>
+                        <div class="lesson-content">Lower the Low band (-3 to -6 dB) to reduce muddiness from low frequencies.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 2: Add Presence</div>
+                        <div class="lesson-content">Boost the Mid band (+2 to +4 dB) to make vocals or instruments stand out.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 3: Enhance Clarity</div>
+                        <div class="lesson-content">Boost the High band (+1 to +3 dB) for clarity and shimmer. Don't overdo it or audio becomes harsh.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📖 Tutorial 4: Using Pitch Correction</div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 1: Detect Notes</div>
+                        <div class="lesson-content">Click "Detect Notes" in the Note Editor to analyze the pitch content of your audio.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 2: Analyze Scale</div>
+                        <div class="lesson-content">Click "Analyze Scale/Key" to automatically determine the musical key.</div>
+                    </div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Step 3: Apply Correction</div>
+                        <div class="lesson-content">Select your desired scale and click "Apply Scale Correction" to snap notes to the scale.</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">📖 Tutorial 5: Exporting Your Work</div>
+                    <div class="lesson-card">
+                        <div class="lesson-title">Save as WAV</div>
+                        <div class="lesson-content">Always export as WAV format (lossless) to preserve quality. Never use lossy formats like MP3 for editing.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHALLENGES TAB -->
+            <div class="tab-content" id="challenges-tab">
+                <div class="section">
+                    <div class="section-title">🏆 Challenge 1: Beginner - Noise Reduction</div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">Objective: Remove background noise</div>
+                        <div class="challenge-description">
+                            <p style="margin-bottom: 10px;">Load a sample file with background hum or noise. Use the Noise Gate with a -30dB threshold. Your goal: reduce noise while preserving the main audio signal.</p>
+                            <p><strong>Success criteria:</strong> Background noise is 50% quieter</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏆 Challenge 2: Intermediate - Click Removal</div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">Objective: Remove clicks and pops</div>
+                        <div class="challenge-description">
+                            <p style="margin-bottom: 10px;">Load audio with audible clicks or pops (vinyl records are great for this). Apply click removal and compare before/after.</p>
+                            <p><strong>Success criteria:</strong> Most clicks are eliminated</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏆 Challenge 3: Intermediate - EQ Balancing</div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">Objective: Balance frequency response</div>
+                        <div class="challenge-description">
+                            <p style="margin-bottom: 10px;">Load a vocal or instrument recording. Use the 3-band EQ to create a balanced sound: reduce low mud, enhance mid presence, add high clarity.</p>
+                            <p><strong>Success criteria:</strong> Audio sounds warm yet clear</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏆 Challenge 4: Advanced - Compression Mastery</div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">Objective: Control dynamic range</div>
+                        <div class="challenge-description">
+                            <p style="margin-bottom: 10px;">Load a vocal with varying volume. Use compression with 4:1 ratio and -20dB threshold to even out the levels.</p>
+                            <p><strong>Success criteria:</strong> Vocal stays consistent in level</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏆 Challenge 5: Advanced - Pitch Correction</div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">Objective: Perfect the pitch</div>
+                        <div class="challenge-description">
+                            <p style="margin-bottom: 10px;">Load a slightly off-pitch vocal. Use Note Editor to detect notes, analyze the scale, and apply pitch correction to snap to the scale.</p>
+                            <p><strong>Success criteria:</strong> Audio sounds in-tune</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-title">🏆 Challenge 6: Expert - Professional Workflow</div>
+                    <div class="challenge-box">
+                        <div class="challenge-title">Objective: Complete professional workflow</div>
+                        <div class="challenge-description">
+                            <p style="margin-bottom: 10px;">Load a "problem" audio file. Apply the complete workflow: noise reduction → click removal → EQ → compression → pitch correction. Export the final result.</p>
+                            <p><strong>Success criteria:</strong> Final audio is clean, balanced, and professional-sounding</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTE EDITOR TAB -->
+            <div class="tab-content" id="note-editor-tab">
+                <div id="note-editor-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script loading verification
+        window.addEventListener('error', (e) => {
+            console.error('Script loading error:', e.filename, e.message, e.lineno);
+        });
+        console.log('HTML loaded, starting script loading...');
+    </script>
+    <script src="../renderer/pitch-engine.js" onerror="console.error('Failed to load pitch-engine.js')"></script>
+    <script src="../renderer/note-editor-ui.js" onerror="console.error('Failed to load note-editor-ui.js')"></script>
+    <script src="../renderer/app.js" onerror="console.error('Failed to load app.js')"></script>
+    <script>
+        console.log('All scripts loaded. PitchEngine available:', typeof PitchEngine !== 'undefined');
+        console.log('NoteEditorUI available:', typeof NoteEditorUI !== 'undefined');
+        
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                document.getElementById(tabName + '-tab').classList.add('active');
+                this.classList.add('active');
+                
+                if (tabName === 'note-editor' && window.noteEditorUI && !window.noteEditorUI.canvas) {
+                    window.noteEditorUI.initPanel();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
